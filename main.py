@@ -2,6 +2,14 @@ import numpy as np
 from PIL import ImageGrab
 import cv2
 import time
+from directkeys import PressKey, ReleaseKey, W, A, S, D
+
+# Countdown before the automatic action
+for i in list(range(4))[::-1]:
+    print(i+1)
+    time.sleep(1)
+
+
 
 last_time = time.time()
 
