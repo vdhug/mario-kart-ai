@@ -10,6 +10,14 @@ for i in list(range(4))[::-1]:
     time.sleep(1)
 
 
+# Draw lines in the screen to posite the character in the middle of the road
+def draw_lines(img,lines):
+    try:
+        for line in lines:
+            coords = line[0]
+            cv2.line(img, (coords[0], coords[1]), (coords[2], coords[3]), [255,255,255], 3)
+    except Exception as e:
+        pass
 
 last_time = time.time()
 
@@ -28,9 +36,15 @@ def process_image(original_image):
     processed_img = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
     # edge detection
     processed_img =  cv2.Canny(processed_img, threshold1 = 200, threshold2=300)
-    vertices = np.array([[10,500],[10,300],[300,200],[500,200],[800,300],[800,500],
+    vertices = np.array([[10,300],[10,200],[300,100],[500,100],[800,200],[800,500],
                          ], np.int32)
+    processed_img = cv2.GaussianBlur(processed_img,(5,5),0)
     processed_img = roi(processed_img, [vertices])
+
+    # more info: http://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_houghlines/py_houghlines.html
+    #                          edges       rho   theta   thresh         # min length, max gap:
+    lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180,      20,         15)
+    draw_lines(processed_img,lines)
     return processed_img
 
 
