@@ -10,6 +10,29 @@ for i in list(range(4))[::-1]:
     time.sleep(1)
 
 
+
+def straight():
+    PressKey(W)
+    ReleaseKey(A)
+    ReleaseKey(D)
+
+def left():
+    PressKey(A)
+    ReleaseKey(W)
+    ReleaseKey(D)
+    ReleaseKey(A)
+
+def right():
+    PressKey(D)
+    ReleaseKey(A)
+    ReleaseKey(W)
+    ReleaseKey(D)
+
+def slow_ya_roll():
+    ReleaseKey(W)
+    ReleaseKey(A)
+    ReleaseKey(D)
+
 # Draw lines in the screen to posite the character in the middle of the road
 def draw_lines(img,lines):
     try:
@@ -43,7 +66,7 @@ def process_image(original_image):
 
     # more info: http://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_houghlines/py_houghlines.html
     #                          edges       rho   theta   thresh         # min length, max gap:
-    lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180,      20,         15)
+    lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180, np.array([]),      150,         5)
     draw_lines(processed_img,lines)
     return processed_img
 
