@@ -1,15 +1,26 @@
 import numpy as np
 import cv2
 import time
-from directkeys import PressKey, ReleaseKey, W, A, S, D
-
+import os
 from grabscreen import grab_screen
+from getkeys import key_check
 
-# Countdown before the automatic action
-for i in list(range(4))[::-1]:
-    print(i+1)
-    time.sleep(1)
 
+def keys_to_output(keys):
+    '''
+    Convert keys to a ...multi-hot... array
+
+    [A,W,D] boolean values.
+    '''
+    output = [0,0,0]
+
+    if 'A' in keys:
+        output[0] = 1
+    elif 'D' in keys:
+        output[2] = 1
+    else:
+        output[1] = 1
+    return output
 
 
 def straight():
@@ -34,14 +45,6 @@ def slow_ya_roll():
     ReleaseKey(A)
     ReleaseKey(D)
 
-# Draw lines in the screen to posite the character in the middle of the road
-def draw_lines(img,lines):
-    try:
-        for line in lines:
-            coords = line[0]
-            cv2.line(img, (coords[0], coords[1]), (coords[2], coords[3]), [255,255,255], 3)
-    except Exception as e:
-        pass
 
 last_time = time.time()
 
@@ -68,21 +71,36 @@ def process_image(original_image):
     # more info: http://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_houghlines/py_houghlines.html
     #                          edges       rho   theta   thresh         # min length, max gap:
     lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180, np.array([]),      150,         5)
-    draw_lines(processed_img,lines)
     return processed_img
 
 
+file_name = 'training_data.npy'
+
+if os.path.isfile(file_name):
+    print('File exists, loading previous data!')
+    training_data = list(np.load(file_name))
+else:
+    print('File does not exist, starting fresh!')
+    training_data = []
+
+
+# Countdown before the automatic action
+for i in list(range(4))[::-1]:
+    print(i+1)
+    time.sleep(1)
 while True:
     # Screen 640 x 480
     screen = grab_screen(region=(0,40,640,480))
-    new_screen = process_image(screen)
-
-    # Output image of AI
-    # cv2.imshow('window', cv2.cvtColor(screen, cv2.COLOR_BGR2RGB))
-    cv2.imshow('new window', new_screen)
-    print('Loop took {} seconds'.format(time.time()-last_time))
+    # print('Loop took {} seconds'.format(time.time()-last_time))
     last_time = time.time()
 
-    if cv2.waitKey(25) & 0xFF == ord('q'):
-        cv2.destroyAllWindows()
-        break
+    # Convert screen to gray scale
+    screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
+    screen = cv2.resize(screen, (80,60))
+    keys = key_check()
+    output = keys_to_output(keys)
+    training_data.append([screen,output])
+
+    if len(training_data) % 500 == 0:
+        print(len(training_data))
+        np.save(file_name, training_data)
