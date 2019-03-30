@@ -1,8 +1,9 @@
 import numpy as np
-from PIL import ImageGrab
 import cv2
 import time
 from directkeys import PressKey, ReleaseKey, W, A, S, D
+
+from grabscreen import grab_screen
 
 # Countdown before the automatic action
 for i in list(range(4))[::-1]:
@@ -73,7 +74,7 @@ def process_image(original_image):
 
 while True:
     # Screen 640 x 480
-    screen =  np.array(ImageGrab.grab(bbox=(0,40,640,480)))
+    screen = grab_screen(region=(0,40,640,480))
     new_screen = process_image(screen)
 
     # Output image of AI
